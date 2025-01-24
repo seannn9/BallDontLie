@@ -47,7 +47,6 @@ export default function App() {
         setPlayers([]);
         setTeams([]);
         setWarning("");
-        setSearchType("");
     };
 
     const handleNameSubmit = async (event: React.FormEvent) => {
@@ -104,7 +103,8 @@ export default function App() {
 
     return (
         <>
-            <h1>Ball Don't Lie</h1>
+        <h1>Ball Don't Lie</h1>
+        <div className="select-search">
             <label htmlFor="search-type">Search by: &nbsp;</label>
             <select name="search-type" id="search-type">
                 <option
@@ -112,7 +112,8 @@ export default function App() {
                     onClick={() => {
                         resetFields();
                     }}
-                    defaultChecked
+                    disabled
+                    selected
                 >
                     Select an option...
                 </option>
@@ -120,6 +121,8 @@ export default function App() {
                     value="name"
                     onClick={() => {
                         setSearchType("name");
+                        setTeams([]);
+                        setWarning("")
                     }}
                 >
                     Name
@@ -128,11 +131,14 @@ export default function App() {
                     value="team"
                     onClick={() => {
                         setSearchType("team");
+                        setPlayers([]);
+                        setWarning("")
                     }}
                 >
                     Team
                 </option>
             </select>
+        </div>
             {searchType === "name" && (
                 <form onSubmit={handleNameSubmit} onReset={resetFields}>
                     <input
@@ -157,19 +163,14 @@ export default function App() {
             )}
             {searchType === "team" && (
                 <form onSubmit={handleTeamSubmit} onReset={resetFields}>
-                    {/* <input
-                        type="text"
-                        placeholder="Team Name..."
-                        value={teamSearch.trim()}
-                        onChange={handleTeamSearchChange}
-                    /> */}
                     <select name="conference" id="conference">
                         <option
                             value=""
                             onClick={() => {
                                 setConference("");
                             }}
-                            defaultChecked
+                            disabled
+                            selected
                         >
                             Select an option...
                         </option>
@@ -190,7 +191,7 @@ export default function App() {
                             East
                         </option>
                     </select>
-                    <button type="submit" value="submit">
+                    <button type="submit" value="submit" disabled={conference === ""}>
                         Search
                     </button>
                     <button type="reset" value="reset">
@@ -198,40 +199,48 @@ export default function App() {
                     </button>
                 </form>
             )}
+        
+                {/* Conditional Rendering based on Player name */}
+                {isLoading && <p>Loading...</p>}
+                {!isLoading && searchType === "name" && players.length === 0 && (
+                    <p>{warning}</p>
+                )}
+                {!isLoading && searchType === "name" && players.length !== 0 &&  (
+                    <div className="results-container">
+                        <ul>
+                            {players.map((player) => {
+                                return (
+                                    <li key={player.id}>
+                                        ({player.id})&nbsp;
+                                        {player.first_name}&nbsp;
+                                        {player.last_name}
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </div>
+                )}
 
-            {isLoading && <p>Loading...</p>}
-            {!isLoading && searchType === "name" && players.length === 0 && (
-                <p>{warning}</p>
-            )}
-            {!isLoading && (
-                <ul>
-                    {players.map((player) => {
-                        return (
-                            <li key={player.id}>
-                                ({player.id})&nbsp;
-                                {player.first_name}&nbsp;
-                                {player.last_name}
-                            </li>
-                        );
-                    })}
-                </ul>
-            )}
-            {!isLoading && searchType === "team" && teams.length === 0 && (
-                <p>{warning}</p>
-            )}
-            {!isLoading && (
-                <ul>
-                    {teams.map((team) => {
-                        return (
-                            <li key={team.id}>
-                                ({team.id})&nbsp;
-                                {team.full_name}&nbsp;
-                                {team.abbreviation}
-                            </li>
-                        );
-                    })}
-                </ul>
-            )}
+                {/* Conditional Rendering based on Team Conference */}
+                {!isLoading && searchType === "team" && teams.length === 0 && (
+                    <p>{warning}</p>
+                )}
+                {!isLoading && searchType === "team" && teams.length !== 0 && (
+                    <div className="results-container">
+                        <ul>
+                            {teams.map((team) => {
+                                return (
+                                    <li key={team.id}>
+                                        ({team.id})&nbsp;
+                                        {team.full_name}&nbsp;
+                                        {team.abbreviation}
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </div>
+                )}
+            
         </>
     );
 }
