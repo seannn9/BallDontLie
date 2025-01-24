@@ -48,7 +48,11 @@ button:focus-visible {
 
 input {
     padding: 1em;
-    margin: 0.5em;
+    margin: 1em;
+}
+
+select {
+    margin: 1em;
 }
 
 @media (prefers-color-scheme: light) {

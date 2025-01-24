@@ -13,7 +13,7 @@ interface NBAPlayer {
 interface NBATeam {
     id: number;
     full_name: string;
-    conference: string;
+    abbreviation: string;
 }
 
 export default function App() {
@@ -22,10 +22,11 @@ export default function App() {
     const [isLoading, setIsLoading] = useState(false);
     const [firstNameSearch, setFirstNameSearch] = useState("");
     const [lastNameSearch, setLastNameSearch] = useState("");
-    const [teamSearch, setTeamSearch] = useState("");
     const [players, setPlayers] = useState<NBAPlayer[]>([]);
     const [teams, setTeams] = useState<NBATeam[]>([]);
     const [searchType, setSearchType] = useState("");
+    const [conference, setConference] = useState("");
+
     const abortControllerRef = useRef<AbortController | null>(null);
 
     const handleFirstNameSearchChange = (
@@ -40,19 +41,13 @@ export default function App() {
         setLastNameSearch(event.target.value);
     };
 
-    const handleTeamSearchChange = (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        setTeamSearch(event.target.value);
-    };
-
     const resetFields = () => {
         setFirstNameSearch("");
         setLastNameSearch("");
-        setTeamSearch("");
         setPlayers([]);
         setTeams([]);
         setWarning("");
+        setSearchType("");
     };
 
     const handleNameSubmit = async (event: React.FormEvent) => {
@@ -85,7 +80,7 @@ export default function App() {
 
     const handleTeamSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        if (!teamSearch) return;
+        if (!conference) return;
         abortControllerRef.current?.abort();
         abortControllerRef.current = new AbortController();
 
@@ -94,7 +89,7 @@ export default function App() {
         setWarning("No Results found");
 
         try {
-            const teams = await api.nba.getTeams({ conference: teamSearch });
+            const teams = await api.nba.getTeams({ conference: conference });
             setTeams(teams.data);
         } catch (err: any) {
             setError(err);
@@ -115,7 +110,7 @@ export default function App() {
                 <option
                     value=""
                     onClick={() => {
-                        setSearchType("");
+                        resetFields();
                     }}
                     defaultChecked
                 >
@@ -169,9 +164,31 @@ export default function App() {
                         onChange={handleTeamSearchChange}
                     /> */}
                     <select name="conference" id="conference">
-                        <option value="">Select an option...</option>
-                        <option value="west">West</option>
-                        <option value="east">East</option>
+                        <option
+                            value=""
+                            onClick={() => {
+                                setConference("");
+                            }}
+                            defaultChecked
+                        >
+                            Select an option...
+                        </option>
+                        <option
+                            value="West"
+                            onClick={() => {
+                                setConference("West");
+                            }}
+                        >
+                            West
+                        </option>
+                        <option
+                            value="East"
+                            onClick={() => {
+                                setConference("East");
+                            }}
+                        >
+                            East
+                        </option>
                     </select>
                     <button type="submit" value="submit">
                         Search
@@ -209,7 +226,7 @@ export default function App() {
                             <li key={team.id}>
                                 ({team.id})&nbsp;
                                 {team.full_name}&nbsp;
-                                {team.conference}
+                                {team.abbreviation}
                             </li>
                         );
                     })}
